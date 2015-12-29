@@ -193,7 +193,6 @@
   ***************************************************************************
   */
 
-
 #ifdef SP
 #define REAL float
 #define ZERO 0.0
@@ -220,7 +219,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <conio.h>
+// #include <conio.h>
 #include <stdlib.h>
 
 
@@ -251,6 +250,7 @@ REAL second()
 }
 
 /* DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE */
+#ifdef UNCOMMENT
 #include <dos.h>   /* for following date functions only */
 void what_date()
 {
@@ -268,6 +268,7 @@ void what_date()
        */         
   return;
 }
+#endif
 
 
 main ()
@@ -287,7 +288,7 @@ main ()
   {
     printf ("Cannot open results file \n\n");
     printf("Press any key\n");
-    Endit = getch();
+    // Endit = getch();
     exit (0);
   }
 
@@ -567,7 +568,7 @@ main ()
   fprintf(stderr,ROLLING);fprintf(stderr,PREC);
   fprintf(stderr," Precision %11.2f Mflops \n\n",mflops);
 
-  what_date();
+  // what_date();
 
   /************************************************************************
    *             Type details of hardware, software etc.                  *
@@ -658,7 +659,7 @@ main ()
   fclose (outfile);
 
   printf("\nPress any key\n");
-  Endit = getch();
+  // Endit = getch();
 }
 
 /*----------------------*/ 

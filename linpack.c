@@ -271,7 +271,7 @@ void what_date()
 #endif
 
 
-main ()
+int main ()
 {
   static REAL aa[200*200],a[200*201],b[200],x[200];       
   REAL cray,ops,total,norma,normx;
@@ -388,7 +388,7 @@ main ()
     }
     time2 = second();
     overhead1 = (time2 - time1);
-    fprintf (stderr,"%10d times %6.2f seconds\n", loop, overhead1);
+    fprintf (stderr,"%10d times %6.6f seconds\n", loop, overhead1);
     if (overhead1 > 5.0)
     {
       pass = 0;
@@ -409,7 +409,7 @@ main ()
 
   overhead1 = overhead1 / (double)loop;
 
-  fprintf (stderr,"Overhead for 1 matgen %12.5f seconds\n\n", overhead1);
+  fprintf (stderr,"Overhead for 1 matgen %12.6f seconds\n\n", overhead1);
 
   /************************************************************************
    *           Calculate matgen/dgefa passes for 5 seconds                *
@@ -428,7 +428,7 @@ main ()
       dgefa(a,lda,n,ipvt,&info );
     }
     time2 = second() - time1;
-    fprintf (stderr,"%10d times %6.2f seconds\n", ntimes, time2);
+    fprintf (stderr,"%10d times %6.6f seconds\n", ntimes, time2);
     if (time2 > 5.0)
     {
       pass = 0;
@@ -511,7 +511,7 @@ main ()
   overhead2 = (time2 - time1);
   overhead2 = overhead2 / (double)loop;
 
-  fprintf (stderr,"Overhead for 1 matgen %12.5f seconds\n\n", overhead2);
+  fprintf (stderr,"Overhead for 1 matgen %12.6f seconds\n\n", overhead2);
   fprintf(stderr,"Times for array with leading dimension of%4d\n\n",ldaa);
   fprintf(stderr,"      dgefa      dgesl      total     Mflops       unit");
   fprintf(stderr,"      ratio\n");
@@ -574,6 +574,7 @@ main ()
    *             Type details of hardware, software etc.                  *
    ************************************************************************/
 
+  /*
   printf ("Enter the following data which will be "
       "appended to file Linpack.txt \n\n");
   printf ("PC Supplier/model ?\n                    ");
@@ -603,6 +604,7 @@ main ()
   printf ("Mail address      ?\n                    ");
   scanf ("%[^\n]", general[0]);
   fflush (stdin);
+  */
 
   /************************************************************************
    *              Add results to output file LLloops.txt                  *

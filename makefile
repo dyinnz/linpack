@@ -4,9 +4,9 @@ CC=icc
 FLAGS=
 #FLAGS+=-no-vec
 #FLAGS+=-no-simd
-FLAGS+=-O1  # -Os would be default enabled
+#FLAGS+=-O1  # -Os would be default enabled
 #FLAGS+=-O2
-#FLAGS+=-O3
+FLAGS+=-O3
 #FLAGS+=-fast
 FLAGS+=-ipo    # mark
 FLAGS+=-no-prec-div
@@ -18,8 +18,9 @@ FLAGS+=-qopt-prefetch=2    # mark
 FLAGS+=-fbuiltin    # mark
 #FLAGS+=-ffunction-sections
 #FLAGS+=-hotpatch
-#FLAGS+=-funroll-all-loops
-#FLAGS+=-unroll-aggressive
+FLAGS+=-unroll
+FLAGS+=-funroll-all-loops
+FLAGS+=-unroll-aggressive
 #FLAGS+=-ipp -ipp-link=static
 #FLAGS+=-mkl -static-intel
 #FLAGS+=-ipp

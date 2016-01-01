@@ -1,0 +1,11 @@
+CC=gcc
+FLAGS=-Ofast
+
+SP_UNROLL=-DSP -DUNROLL
+
+linpack: linpack.c makefile
+	${CC} $< -o sp_unroll ${FLAGS} ${SP_UNROLL}
+
+.PHONY: clean
+clean:
+	rm -f sp_roll sp_unroll dp_roll dp_unroll

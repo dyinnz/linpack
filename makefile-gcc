@@ -1,5 +1,19 @@
 CC=gcc
-FLAGS=-Ofast
+FLAGS=
+FLAGS+=-Ofast
+FLAGS+=-march=native
+FLAGS+=-fbuiltin
+FLAGS+=-fhosted
+FLAGS+=-freciprocal-math -fassociative-math -fno-trapping-math 
+FLAGS+=-fprefetch-loop-arrays
+FLAGS+=-ffunction-sections -fdata-sections
+FLAGS+=-fwhole-program
+FLAGS+=-funsafe-loop-optimizations
+#FLAGS+=-freschedule-modulo-scheduled-loops -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -fgraphite-identity -floop-nest-optimize -floop-unroll-and-jam -ftree-loop-if-convert-stores
+FLAGS+=-ftree-vectorize
+FLAGS+=-floop-strip-mine
+FLAGS+=-floop-nest-optimize
+FLAGS+=-floop-unroll-and-jam
 
 SP_UNROLL=-DSP -DUNROLL
 

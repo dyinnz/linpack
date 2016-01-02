@@ -57,7 +57,7 @@ REAL second()
 int main ()
 {
   static REAL aa[200*200] __attribute__((aligned(64)));
-  static REAL a[200*201] __attribute__((aligned(64)));
+  static REAL a[200*208] __attribute__((aligned(64)));
   static REAL b[200] __attribute__((aligned(64)));
   static REAL x[200] __attribute__((aligned(64)));
   static int ipvt[200] __attribute__((aligned(64)));
@@ -89,7 +89,7 @@ int main ()
   options  = "INSERT OPTIMISATION OPTIONS HERE";
   /* Include -dDP or -dSP and -dROLL or -dUNROLL */
 
-  lda = 201;
+  lda = 208;
   ldaa = 200;
   cray = .056; 
   n = 100;

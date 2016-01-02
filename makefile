@@ -6,53 +6,56 @@ FLAGS+=-qopt-report=3
 
 # ** -O[n] level; -Os would be default enabled in -O1
 # FLAGS += -Os
- FLAGS += -O1
+# FLAGS += -O1
 # FLAGS += -O2
-# FLAGS += -O3
+ FLAGS += -O3
+# -fast = -ipo, -O3, -no-prec-div, -static, -fp-model fast=2, -xHost
 # FLAGS += -fast
 
-# ** target architecture
+# *** target architecture
  FLAGS += -xHost
-
-# ** interprocedural optimization
-# FLAGS += -ipo
 
 # * profile guide optimization
 # FLAGS += -prof-gen
 # FLAGS += -prof-use
 
-# ** builtin function provided by compiler
-# FLAGS += -fbuiltin
+# ** interprocedural optimization
+ FLAGS += -ipo
 
-# ** inline function for possible; -O2/-O3/-Ofast + -finline takes effect,
-# -O1 + -finline takes little effect
-# FLAGS += -finline
+# ** inline function for possible;
+# -O1 -finline: takes little effect
+# -O2/-O3 -finline: Address boundary error ? 
+# -O2/-O3/-Ofast -finline: takes effect, and other option?
+ FLAGS += -finline
+
+# ** builtin function provided by compiler; do not effects others
+ FLAGS += -fbuiltin
 
 # * math presicion
-# FLAGS += -no-prec-div
-# FLAGS += -fp-model fast=2
+ FLAGS += -no-prec-div
+ FLAGS += -fp-model fast=2
 
-# ** set no pointer alias
-# FLAGS += -fno-alias -fargument-noalias -fargument-noalias-global
+# *** set no pointer alias; do not effects others
+ FLAGS += -fno-alias -fargument-noalias -fargument-noalias-global
+# *** what the fuck ?
+ FLAGS += -qopt-subscript-in-range
+# **  what the fuck ?
+ FLAGS += -falign-functions
 
 # if using raw c source file, turn this on because of core dump
 # FLAGS += -no-vec
 
 # no much effect
-# FLAGS += -unroll
-# FLAGS += -funroll-all-loops
 # FLAGS += -unroll-aggressive
+# FLAGS += -funroll-all-loops
 
 # use static libraries
 # FLAGS += -static
 
 # * all about prefetch, may take effect
-# FLAGS += -qopt-prefetch=2
+ FLAGS += -qopt-prefetch
 # FLAGS += -qopt-prefetch-issue-excl-hint
 # 
-# others 
-# FLAGS += -qopt-subscript-in-range
-# FLAGS += -falign-functions
 # FLAGS += -ffunction-sections
 # FLAGS += -hotpatch
 

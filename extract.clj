@@ -1,10 +1,6 @@
 (require '[clojure.string :as str])
-(println "hello")
 
 (def cut-off #"-----------------------------------------------------")
-
-(str/split "hehehehe" #"h")
-
 
 (defn split-reports
   [filename]
@@ -56,11 +52,12 @@
 (def take-report (first raw-reports))
 ;(println (get-date take-report {}))
 ;(println (get-matgen-dgefa-time take-report {}))
-(println (get-flags take-report {}))
+;(println (get-flags take-report {}))
 ;(println (get-mflops take-report {}))
 ;(println (generate-performance take-report))
 
-(def extracted-reports (map generate-performance raw-reports))
+(def extracted-reports (filter #(:matgen %)
+                                  (map generate-performance raw-reports)))
 
 (defn write-out
   [performance-report]

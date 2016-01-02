@@ -178,6 +178,7 @@ int main ()
     time2 = second();
     overhead1 = (time2 - time1);
     fprintf (stderr,"%10d times %6.6f seconds\n", loop, overhead1);
+    fprintf (outfile,"%10d times %6.6f seconds\n", loop, overhead1);
     if (overhead1 > 5.0)
     {
       pass = 0;
@@ -218,6 +219,7 @@ int main ()
     }
     time2 = second() - time1;
     fprintf (stderr,"%10d times %6.6f seconds\n", ntimes, time2);
+    fprintf (outfile,"%10d times %6.6f seconds\n", ntimes, time2);
     if (time2 > 5.0)
     {
       pass = 0;
@@ -360,22 +362,6 @@ int main ()
    /************************************************************************
    *              Add results to output file LLloops.txt                  *
    ************************************************************************/
-
-  fprintf (outfile, "----------------- ----------------- --------- "
-      "--------- ---------\n");
-  fprintf (outfile, "LINPACK BENCHMARK FOR PCs 'C/C++'    n @ 100\n\n");
-  fprintf (outfile, "Month run         %d/%d\n", this_month, this_year);
-  fprintf (outfile, "PC model          %s\n", general[1]);
-  fprintf (outfile, "CPU               %s\n", general[2]);
-  fprintf (outfile, "Clock MHz         %s\n", general[3]);
-  fprintf (outfile, "Cache             %s\n", general[4]);
-  fprintf (outfile, "Options           %s\n", general[5]);
-  fprintf (outfile, "OS/DOS            %s\n", general[6]);
-  fprintf (outfile, "Compiler          %s\n", compiler);
-  fprintf (outfile, "OptLevel          %s\n", options);
-  fprintf (outfile, "Run by            %s\n", general[7]);
-  fprintf (outfile, "From              %s\n", general[8]);
-  fprintf (outfile, "Mail              %s\n\n", general[0]);
 
   fprintf(outfile, "Rolling            %s\n",ROLLING);
   fprintf(outfile, "Precision          %s\n",PREC); 

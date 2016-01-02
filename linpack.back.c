@@ -1,3 +1,198 @@
+/*
+ *          Linpack 100x100 Benchmark In C/C++ For PCs
+ *
+ ********************************************************************
+ *
+ *                 Original Source from NETLIB
+ *
+ *  Translated to C by Bonnie Toy 5/88 (modified on 2/25/94  to fix
+ *  a problem with daxpy for unequal increments or equal increments
+ *  not equal to 1. Jack Dongarra)
+ *
+ *  To obtain rolled source BLAS, add -DROLL to the command lines.
+ *  To obtain unrolled source BLAS, add -DUNROLL to the command lines.
+ *
+ *  You must specify one of -DSP or -DDP to compile correctly.
+ *
+ *  You must specify one of -DROLL or -DUNROLL to compile correctly.
+ *
+ ********************************************************************
+ *
+ *                   Changes in this version
+ *
+ *  1. Function prototypes are declared and function headers have
+ *     embedded parameter types to produce code for C and C++
+ *
+ *  2. Arrays aa and a are declared as [200*200] and [200*201] to
+ *     allow compilation with prototypes.
+ *
+ *  3. Function second changed (compiler dependent).
+ *
+ *  4. Timing method changed due to inaccuracy of PC clock (see below).
+ *
+ *  5. Additional date function included (compiler dependent).
+ *
+ *  6. Additional code used as a standard for a series of benchmarks:-
+ *       Automatic run time calibration rather than fixed parameters
+ *       Initial calibration with display to show linearity
+ *       Results displayed at reasonable rate for viewing (5 seconds)
+ *       Facilities for typing in details of system used etc.
+ *       Compiler details in code in case .exe files used elsewhere
+ *       Results appended to a text file (Linpack.txt)
+ *
+ *  Roy Longbottom  101323.2241@compuserve.com    14 September 1996
+ * 
+ ************************************************************************
+ *
+ *                             Timing
+ *
+ *  The PC timer is updated at about 18 times per second or resolution of
+ *  0.05 to 0.06 seconds which is similar to the time taken by the main
+ *  time consuming function dgefa on a 100 MHz Pentium. Thus there is no
+ *  point in running the dgefa/dges1 combination three times as in the
+ *  original version. Main timing for the latter, in the loop run NTIMES,
+ *  executes matgen/dgefa, summing the time taken by matgen within the
+ *  loop for later deduction from the total time. On a modern PC this sum
+ *  can be based on a random selection of 0 or 0.05/0.06. This version
+ *  executes the single pass once and the main timing loop five times,
+ *  calculating the matgen overhead separately.
+ *
+ *************************************************************************
+ *
+ *                    Example of Output
+ *
+ * Rolled Double Precision Linpack Benchmark - PC Version in 'C/C++'
+ *
+ * Compiler     Watcom C/C++ 10.5 Win 386
+ * Optimisation -zp4 -otexan -fp5 -5r -dDP -dROLL
+ *
+ *
+ * norm resid      resid           machep         x[0]-1          x[n-1]-1
+ *  0.4   7.41628980e-014  1.00000000e-015 -1.49880108e-014 -1.89848137e-014
+*
+*
+* Times are reported for matrices of order          100
+* 1 pass times for array with leading dimension of  201
+*
+*     dgefa      dgesl      total     Mflops       unit      ratio
+*   0.06000    0.00000    0.06000      11.44     0.1748     1.0714
+*
+*
+* Calculating matgen overhead
+*
+*       10 times   0.11 seconds
+*       20 times   0.22 seconds
+*       40 times   0.44 seconds
+*       80 times   0.87 seconds
+*      160 times   1.76 seconds
+*      320 times   3.52 seconds
+*      640 times   7.03 seconds
+*
+* Overhead for 1 matgen      0.01098 seconds
+*
+*
+* Calculating matgen/dgefa passes for 5 seconds
+*
+*       10 times   0.71 seconds
+*       20 times   1.38 seconds
+*       40 times   2.80 seconds
+*       80 times   5.66 seconds      
+*
+*      Passes used         70 
+*
+*  This is followed by output of the normal data for dgefa, dges1,
+  *  total, Mflops, unit and ratio with five sets of results for each.
+  *
+  ************************************************************************
+  *
+  *                Example from output file Linpack.txt
+  *
+  * LINPACK BENCHMARK FOR PCs 'C/C++'    n @ 100
+  *
+  * Month run         9/1996
+  * PC model          Escom
+  * CPU               Pentium
+  * Clock MHz         100
+  * Cache             256K
+  * Options           Neptune chipset
+  * OS/DOS            Windows 95
+  * Compiler          Watcom C/C++ 10.5 Win 386
+  * OptLevel          -zp4 -otexan -fp5 -5r -dDP -dROLL
+  * Run by            Roy Longbottom
+  * From              UK
+  * Mail              101323.2241@compuserve.com 
+  *
+  * Rolling            Rolled 
+  * Precision          Double 
+  * norm. resid                     0.4
+  * resid               7.41628980e-014
+* machep              1.00000000e-015             (8.88178420e-016 NON OPT)
+  * x[0]-1             -1.49880108e-014
+  * x[n-1]-1           -1.89848137e-014
+  * matgen 1 seconds            0.01051
+  * matgen 2 seconds            0.01050
+  * Repetitions                      70
+  * Leading dimension               201
+  *                               dgefa     dgesl     total    Mflops
+  * 1 pass seconds              0.06000   0.00000   0.06000
+  * Repeat seconds              0.06092   0.00157   0.06249     10.99
+  * Repeat seconds              0.06077   0.00157   0.06234     11.01
+  * Repeat seconds              0.06092   0.00157   0.06249     10.99
+  * Repeat seconds              0.06092   0.00157   0.06249     10.99
+  * Repeat seconds              0.06092   0.00157   0.06249     10.99
+  * Average                                                     10.99
+  * Leading dimension               200
+  * Repeat seconds              0.05936   0.00157   0.06093     11.27
+  * Repeat seconds              0.05936   0.00157   0.06093     11.27
+  * Repeat seconds              0.05864   0.00157   0.06021     11.40
+  * Repeat seconds              0.05936   0.00157   0.06093     11.27
+  * Repeat seconds              0.05864   0.00157   0.06021     11.40
+  * Average                                                     11.32
+  *
+  ************************************************************************
+  *
+  *                     Examples of Results
+  *
+  *  Precompiled codes were produced via a Watcom C/C++ 10.5 compiler. 
+  *  Versions are available for DOS, Windows 3/95 and NT/Win 95. Both
+  *  non-optimised and optimised programs are available. The latter has
+  *  options as in the above example. Although these options can place
+  *  functions in-line, in this case, daxpy is not in-lined. Optimisation
+  *  reduces 18 instructions in the loop in this function to the following:
+  *
+*               L85         fld     st(0)
+  *                           fmul    qword ptr [edx]
+  *                           add     eax,00000008H
+  *                           add     edx,00000008H
+  *                           fadd    qword ptr -8H[eax]
+  *                           inc     ebx
+  *                           fstp    qword ptr -8H[eax]
+  *                           cmp     ebx,esi
+  *                           jl      L85
+  *
+  *  Results produced are not consistent between runs but produce similar
+  *  speeds when executing at a particular dimension (see above). An example
+  *  of other results is 11.4/10.5 Mflops. Most typical double precision
+  *  rolled results are:
+  *
+  *                               Opt   No Opt                        Version/
+  *               MHz    Cache  Mflops  Mflops  Make/Options            Via
+  *
+  *   AM80386DX    40     128K    0.53    0.36  Clone                  Win/W95
+  *   80486DX2     66     128K    2.5     1.9   Escom SIS chipset      Win/W95
+  *   80486DX2     66     128K    2.3     1.9   Escom SIS chipset       NT/W95
+  *   80486DX2     66     128K    2.8     2.0   Escom SIS chipset      Dos/Dos
+  *   Pentium     100     256K    11      4.2   Escom Neptune chipset  Win/W95
+  *   Pentium     100     256K    11      5.5   Escom Neptune chipset   NT/W95 
+  *   Pentium     100     256K    12      4.4   Escom Neptune chipset  Dos/Dos
+  *   Pentium Pro 200     256K    48     19     Dell XPS Pro200n        NT/NT
+  *
+  *  The results are as produced when compiled as Linpack.cpp. Compiling as
+  *  Linpack.c gives similar speeds but the code is a little different.
+  * 
+  ***************************************************************************
+  */
+
 #ifdef SP
 #define REAL float
 #define ZERO 0.0
@@ -24,8 +219,8 @@
 
 #include <stdio.h>
 #include <math.h>
+// #include <conio.h>
 #include <stdlib.h>
-#include <string.h>
 
 
   static REAL atime[9][15];
@@ -54,19 +249,35 @@ REAL second()
   return secs ;
 }
 
+/* DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE DATE */
+#ifdef UNCOMMENT
+#include <dos.h>   /* for following date functions only */
+void what_date()
+{
+  /*   Watcom   */         
+  struct dosdate_t adate;
+  _dos_getdate( &adate );
+  this_month = adate.month;
+  this_year = adate.year;
+
+  /*   Borland
+       struct date adate;
+       getdate( &adate );
+       this_month = adate.da_mon;
+       this_year = adate.da_year;
+       */         
+  return;
+}
+#endif
+
+
 int main ()
 {
-  static REAL aa[200*200] __attribute__((aligned(64)));
-  static REAL a[200*201] __attribute__((aligned(64)));
-  static REAL b[200] __attribute__((aligned(64)));
-  static REAL x[200] __attribute__((aligned(64)));
-  static int ipvt[200] __attribute__((aligned(64)));
-  static REAL norma __attribute__((aligned(64)));
-
-  REAL cray,ops,total,normx;
+  static REAL aa[200*200],a[200*201],b[200],x[200];       
+  REAL cray,ops,total,norma,normx;
   REAL resid,residn,eps,t1,tm2,epsn,x1,x2;
   REAL mflops;
-  static int n,i,j,ntimes,info,lda,ldaa;
+  static int ipvt[200],n,i,j,ntimes,info,lda,ldaa;
   int Endit, pass, loop;
   REAL overhead1, overhead2, time1, time2;
   FILE    *outfile;
@@ -357,7 +568,45 @@ int main ()
   fprintf(stderr,ROLLING);fprintf(stderr,PREC);
   fprintf(stderr," Precision %11.2f Mflops \n\n",mflops);
 
-   /************************************************************************
+  // what_date();
+
+  /************************************************************************
+   *             Type details of hardware, software etc.                  *
+   ************************************************************************/
+
+  /*
+  printf ("Enter the following data which will be "
+      "appended to file Linpack.txt \n\n");
+  printf ("PC Supplier/model ?\n                    ");
+  scanf ("%[^\n]", general[1]);
+  fflush (stdin);
+  printf ("CPU               ?\n                    ");
+  scanf ("%[^\n]", general[2]);
+  fflush (stdin);
+  printf ("Clock MHz         ?\n                    ");
+  scanf ("%[^\n]", general[3]);
+  fflush (stdin);
+  printf ("Cache             ?\n                    ");
+  scanf ("%[^\n]", general[4]);
+  fflush (stdin);
+  printf ("Chipset/options   ?\n                    ");
+  scanf ("%[^\n]", general[5]);
+  fflush (stdin);
+  printf ("OS/DOS version    ?\n                    ");
+  scanf ("%[^\n]", general[6]);
+  fflush (stdin);
+  printf ("Your name         ?\n                    ");
+  scanf ("%[^\n]", general[7]);
+  fflush (stdin);
+  printf ("Where from        ?\n                    ");
+  scanf ("%[^\n]", general[8]);
+  fflush (stdin);
+  printf ("Mail address      ?\n                    ");
+  scanf ("%[^\n]", general[0]);
+  fflush (stdin);
+  */
+
+  /************************************************************************
    *              Add results to output file LLloops.txt                  *
    ************************************************************************/
 
@@ -410,6 +659,9 @@ int main ()
   fprintf(outfile, "Average            %46.2f\n\n",atime[3][12]); 
 
   fclose (outfile);
+
+  printf("\nPress any key\n");
+  // Endit = getch();
 }
 
 /*----------------------*/ 
@@ -424,86 +676,36 @@ void print_time (int row)
 
 /*----------------------*/ 
 
-inline void matgen (REAL a[], int lda, int n, REAL b[], REAL *norma)
+void matgen (REAL a[], int lda, int n, REAL b[], REAL *norma)
 
 
   /* We would like to declare a[][lda], but c does not allow it.  In this
      function, references to a[i][j] are written a[lda*i+j].  */
 
 {
-  memset(b, 0, sizeof(REAL) * n);
-
-  /*
   int init, i, j;
+
   init = 1325;
   *norma = 0.0;
-  
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) {
-      //init = 3125*init % 65536;
-      //init = (3125*init) & 0xFFFF;
-      init *= 3125;
-      init &= 0xFFFF;
+      init = 3125*init % 65536;
       a[lda*j+i] = (init - 32768.0)/16384.0;                        
-      b[i] += a[lda*j+i];
-    }
-  }
-  */
-
-#define INIT 8
-  static int init[INIT] __attribute__((aligned(64)));
-  int i, j, k, m = n % INIT;
-  init[INIT-1] = 1325;
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < n-m; i += INIT) {
-      init[0] = (3125*init[INIT-1]) & 0xFFFF;
-      for (k = 1; k < INIT; ++k) {
-        init[k] = (3125*init[k-1]) & 0xFFFF;
-      }
-      // #pragma simd
-      for (k = i; k < i + INIT; ++k) {
-        a[lda*j+k] = (init[k-i] - 32768.0)/16384.0;
-        // b[i] += a[lda*j+k];
-      }
-    }
-    if (0 != m) {
-      for (i = n-m; i < n; ++i) {
-        init[INIT-1] = (3125*init[INIT-1]) & 0xFFFF;
-        a[lda*j+i] = (init[INIT-1] - 32768.0)/16384.0;
-        // b[i] += a[lda*j+i];
-      }
-    }
-  }
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < n; i++) {
-      b[i] += a[lda*j+i];
-    }
-  }
-
-  for (j = 0; j < n; j++) {
-    for (i = 0; i < n; i++) {
       *norma = (a[lda*j+i] > *norma) ? a[lda*j+i] : *norma;
+
+      /* alternative for some compilers
+         if (fabs(a[lda*j+i]) > *norma) *norma = fabs(a[lda*j+i]);
+         */
     }
   }
-
-  /*
-  int m = n & 0x02;
-
-  for (j = 0; j < n; ++j) {
-    for (i = 0; i < n-m; i+=4) {
-      *norma = (a[lda*j+i  ] > *norma) ? a[lda*j+i  ] : *norma;
-      *norma = (a[lda*j+i+1] > *norma) ? a[lda*j+i+1] : *norma;
-      *norma = (a[lda*j+i+2] > *norma) ? a[lda*j+i+2] : *norma;
-      *norma = (a[lda*j+i+3] > *norma) ? a[lda*j+i+3] : *norma;
-    }
-    if (0 != m) {
-      for (i = n-m; i < n; ++i) {
-        *norma = (a[lda*j+i] > *norma) ? a[lda*j+i] : *norma;
-      }
+  for (i = 0; i < n; i++) {
+    b[i] = 0.0;
+  }
+  for (j = 0; j < n; j++) {
+    for (i = 0; i < n; i++) {
+      b[i] = b[i] + a[lda*j+i];
     }
   }
-  */
-
   return;
 }
 

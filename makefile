@@ -4,9 +4,9 @@ CC=icc
 FLAGS=
 #FLAGS+=-no-vec
 #FLAGS+=-no-simd
-FLAGS+=-O1  # -Os would be default enabled
+#FLAGS+=-O1  # -Os would be default enabled
 #FLAGS+=-O2
-#FLAGS+=-O3
+FLAGS+=-O3
 #FLAGS+=-fast
 FLAGS+=-ipo    # mark
 FLAGS+=-no-prec-div
@@ -16,11 +16,14 @@ FLAGS+=-xHost    # mark
 FLAGS+=-fno-alias -fargument-noalias -fargument-noalias-global  # mark
 FLAGS+=-qopt-prefetch=2    # mark
 FLAGS+=-fbuiltin    # mark
+
 #FLAGS+=-ffunction-sections
 #FLAGS+=-hotpatch
+
 FLAGS+=-unroll
 FLAGS+=-funroll-all-loops
 FLAGS+=-unroll-aggressive
+
 #FLAGS+=-ipp -ipp-link=static
 #FLAGS+=-mkl -static-intel
 #FLAGS+=-ipp
@@ -31,13 +34,15 @@ FLAGS+=-unroll-aggressive
 FLAGS+=-qopt-subscript-in-range
 #FLAGS+=-use-intel-optimized-headers
 
-#FLAGS+=-finline
-#FLAGS+=-falign-functions
+FLAGS+=-finline   # mark*** -O3/-Ofast + -finline
+FLAGS+=-falign-functions
 
 #FLAGS+=-Ofast 	# gcc, clang. compatibility in icc
 
 #FLAGS+=-prof-gen
 #FLAGS+=-prof-use
+
+FLAGS+=-qopt-report=3
 
 SP_ROLL=-DSP -DROLL
 SP_UNROLL=-DSP -DUNROLL

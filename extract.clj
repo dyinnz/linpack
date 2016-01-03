@@ -38,40 +38,38 @@
            :mflops201 (second (re-find matcher))
            :mflops200 (second (re-find matcher)))))
 
-(def re-find-all
-  (fn [re s]
-    (let [matcher (re-matcher re s)
-  )
+(def re-find-all 
+  (fn [re s] 
+    (let [matcher (re-matcher re s)]
+      (loop [notes []
+             getted (re-find matcher)]
+        (if (nil? getted)
+          notes
+          (recur (conj notes getted)
+                 (re-find matcher)))))))
 
-(defn get-notes
-  [report performance]
-  (let [matcher (re-matcher #"NOTE:\s+(.*)" report)
-        notes (loop [iter-notes [] 
-                     getted (re-find matcher)]
-                (if (nil? getted)
-                  iter-notes
-                  (recur (conj iter-notes (second getted))
-                         (re-find matcher))))]
-    (assoc performance :notes notes)))
-
-(def get-notes
+(def get-notes 
   (getter-maker [:notes]
-                [(fn [r] (let [matcher (re-matcher #"NOTE:\s+(.*)" r)]
-                           (loop [iter-notes [] 
-                                  getted (re-find matcher)]
-                             (if (nil? getted)
-                               iter-notes
-                               (recur (conj iter-notes (second getted))
-                                      (re-find matcher))))))]))
+                [#(map second (re-find-all #"NOTE:\s+(.*)" %))]))
+
+;(defn generate-performance
+;  [report]
+;  (->> {}
+;       (get-date report)
+;       (get-flags report)
+;       (get-matgen-dgefa-time report)
+;       (get-mflops report)
+;       (get-notes report)))
 
 (defn generate-performance
   [report]
-  (->> {}
-       (get-date report)
-       (get-flags report)
-       (get-matgen-dgefa-time report)
-       (get-mflops report)
-       (get-notes report)))
+  (reduce (fn [results f] (f report results))
+          {}
+          [get-date
+           get-flags
+           get-matgen-dgefa-time
+           get-mflops
+           get-notes]))
 
 (def take-report (first raw-reports))
 ; (println (get-date take-report {}))
@@ -79,10 +77,9 @@
 ; (println (get-flags take-report {}))
 ; (println (get-mflops take-report {}))
 ; (println (generate-performance take-report))
-(println (get-notes take-report {}))
+; (println (get-notes take-report {}))
 
-(def extracted-reports (filter #(:matgen %)
-                               (map generate-performance raw-reports)))
+(def extracted-reports (map generate-performance raw-reports))
 
 (defn write-out
   [performance-report]

@@ -436,6 +436,7 @@ inline void matgen (REAL a[], int lda, int n, REAL b[], REAL *norma)
   }
   */
 
+  
 #define INIT 8
   static int init[INIT] __attribute__((aligned(64)));
   int i, j, k, m = n % INIT;
@@ -449,14 +450,12 @@ inline void matgen (REAL a[], int lda, int n, REAL b[], REAL *norma)
       // #pragma simd
       for (k = i; k < i + INIT; ++k) {
         a[lda*j+k] = (init[k-i] - 32768.0)/16384.0;
-        // b[i] += a[lda*j+k];
       }
     }
     if (0 != m) {
       for (i = n-m; i < n; ++i) {
         init[INIT-1] = (3125*init[INIT-1]) & 0xFFFF;
         a[lda*j+i] = (init[INIT-1] - 32768.0)/16384.0;
-        // b[i] += a[lda*j+i];
       }
     }
   }
@@ -465,31 +464,11 @@ inline void matgen (REAL a[], int lda, int n, REAL b[], REAL *norma)
       b[i] += a[lda*j+i];
     }
   }
-
   for (j = 0; j < n; j++) {
     for (i = 0; i < n; i++) {
       *norma = (a[lda*j+i] > *norma) ? a[lda*j+i] : *norma;
     }
   }
-
-  /*
-  int m = n & 0x02;
-
-  for (j = 0; j < n; ++j) {
-    for (i = 0; i < n-m; i+=4) {
-      *norma = (a[lda*j+i  ] > *norma) ? a[lda*j+i  ] : *norma;
-      *norma = (a[lda*j+i+1] > *norma) ? a[lda*j+i+1] : *norma;
-      *norma = (a[lda*j+i+2] > *norma) ? a[lda*j+i+2] : *norma;
-      *norma = (a[lda*j+i+3] > *norma) ? a[lda*j+i+3] : *norma;
-    }
-    if (0 != m) {
-      for (i = n-m; i < n; ++i) {
-        *norma = (a[lda*j+i] > *norma) ? a[lda*j+i] : *norma;
-      }
-    }
-  }
-  */
-
   return;
 }
 

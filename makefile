@@ -81,12 +81,15 @@ SP_ROLL   = -DSP -DROLL
 SP_UNROLL = -DSP -DUNROLL
 DP_ROLL   = -DDP -DROLL
 DP_UNROLL = -DDP -DUNROLL
- 
+
+TYPE = ${SP_UNROLL}
+
 linpack: linpack.c makefile
-	${CC} $< -o sp_unroll ${FLAGS} ${SP_UNROLL}
+	${CC} $< -o sp_unroll ${FLAGS} ${TYPE}
 	@ echo '-----------------------------------------------------' >> Linpack.txt
 	@ date >> Linpack.txt
-	@ echo 'FLAGS:' ${FLAGS} >> Linpack.txt
+	@ echo 'TYPE: ' ${TYPE} >> Linpack.txt
+	@ echo 'FLAGS: icc ' ${FLAGS} >> Linpack.txt
 
 .PHONY: clean
 clean:

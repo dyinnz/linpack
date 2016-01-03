@@ -19,6 +19,9 @@ SP_UNROLL=-DSP -DUNROLL
 
 linpack: linpack.c makefile
 	${CC} $< -o sp_unroll ${FLAGS} ${SP_UNROLL}
+	@ echo '-----------------------------------------------------' >> Linpack.txt
+	@ date >> Linpack.txt
+	@ echo 'FLAGS: gcc ' ${FLAGS} >> Linpack.txt
 
 .PHONY: clean
 clean:

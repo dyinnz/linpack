@@ -19,6 +19,8 @@
 #define ROLLING "Unrolled "
 #endif
 
+#define AN 100
+#define N 100
 
 #define NTIMES 10
 
@@ -38,8 +40,10 @@
   void dgesl (REAL a[],int lda,int n,int ipvt[],REAL b[],int job);
   void dmxpy (int n1, REAL y[], int n2, int ldm, REAL x[], REAL m[]);
   void daxpy (int n, REAL da, REAL dx[], int incx, REAL dy[], int incy);
+  void ex_daxpy(int n, REAL da, REAL dx[], REAL dy[]);
   REAL epslon (REAL x);
   int idamax (int n, REAL dx[], int incx);
+  int ex_idamax(int n, REAL dx[]);
   void dscal (int n, REAL da, REAL dx[], int incx);
   REAL ddot (int n, REAL dx[], int incx, REAL dy[], int incy);
 
@@ -56,11 +60,11 @@ REAL second()
 
 int main ()
 {
-  static REAL aa[200*200] __attribute__((aligned(64)));
-  static REAL a[200*208] __attribute__((aligned(64)));
-  static REAL b[200] __attribute__((aligned(64)));
-  static REAL x[200] __attribute__((aligned(64)));
-  static int ipvt[200] __attribute__((aligned(64)));
+  static REAL aa[AN*AN] __attribute__((aligned(64)));
+  static REAL a[AN*(AN+8)] __attribute__((aligned(64)));
+  static REAL b[AN] __attribute__((aligned(64)));
+  static REAL x[AN] __attribute__((aligned(64)));
+  static int ipvt[AN] __attribute__((aligned(64)));
   static REAL norma __attribute__((aligned(64)));
 
   REAL cray,ops,total,normx;
@@ -89,10 +93,10 @@ int main ()
   options  = "INSERT OPTIMISATION OPTIONS HERE";
   /* Include -dDP or -dSP and -dROLL or -dUNROLL */
 
-  lda = 208;
-  ldaa = 200;
+  lda = AN+8;
+  ldaa = AN;
   cray = .056; 
-  n = 100;
+  n = N;
 
   fprintf(stdout,ROLLING);fprintf(stdout,PREC);
   fprintf(stdout,"Precision Linpack Benchmark - PC Version in 'C/C++'\n\n");
@@ -159,7 +163,6 @@ int main ()
   atime[5][0] = total/cray;
 
   print_time(0);
-
   /************************************************************************
    *       Calculate overhead of executing matgen procedure              *
    ************************************************************************/
@@ -179,7 +182,7 @@ int main ()
     overhead1 = (time2 - time1);
     fprintf (stderr,"%10d times %6.6f seconds\n", loop, overhead1);
     fprintf (outfile,"%10d times %6.6f seconds\n", loop, overhead1);
-    if (overhead1 > 5.0)
+    if (overhead1 > 0.5)
     {
       pass = 0;
     }
@@ -220,7 +223,7 @@ int main ()
     time2 = second() - time1;
     fprintf (stderr,"%10d times %6.6f seconds\n", ntimes, time2);
     fprintf (outfile,"%10d times %6.6f seconds\n", ntimes, time2);
-    if (time2 > 5.0)
+    if (time2 > 0.5)
     {
       pass = 0;
     }
@@ -245,6 +248,7 @@ int main ()
   fprintf(stderr,"Times for array with leading dimension of%4d\n\n",lda);
   fprintf(stderr,"      dgefa      dgesl      total     Mflops       unit");
   fprintf(stderr,"      ratio\n");        
+
 
   /************************************************************************
    *                              Execute 5 passes                        *
@@ -540,7 +544,8 @@ void dgefa(REAL a[], int lda, int n, int ipvt[], int *info)
 
       /* find l = pivot index */
 
-      l = idamax(n-k,&a[lda*k+k],1) + k;
+      // l = idamax(n-k,&a[lda*k+k],1) + k;
+      l = ex_idamax(n-k, a+lda*k+k) + k;
       ipvt[k] = l;
 
       /* zero pivot implies this column already 
@@ -550,10 +555,21 @@ void dgefa(REAL a[], int lda, int n, int ipvt[], int *info)
 
         /* interchange if necessary */
 
+        /*
         if (l != k) {
           t = a[lda*k+l];
           a[lda*k+l] = a[lda*k+k];
           a[lda*k+k] = t; 
+        }
+        */
+        if (l != k) {
+#pragma prefetch a[lda*j+l]:0:4
+#pragma prefetch a[lda*j+k]:0:4
+          for (j = k; j < n; ++j) {
+            t = a[lda*j+l];
+            a[lda*j+l] = a[lda*j+k];
+            a[lda*j+k] = t;
+          }
         }
 
         /* compute multipliers */
@@ -563,15 +579,25 @@ void dgefa(REAL a[], int lda, int n, int ipvt[], int *info)
 
         /* row elimination with column indexing */
 
+        int h;
+        for (j = kp1; j < n; ++j) {
+          #pragma simd
+          for (h = kp1; h < n; ++h) {
+            a[lda*j+h] += a[lda*j+k] * a[lda*k+h];
+          }
+        }
+
+        /*
         for (j = kp1; j < n; j++) {
           t = a[lda*j+l];
           if (l != k) {
             a[lda*j+l] = a[lda*j+k];
             a[lda*j+k] = t;
           }
-          daxpy(n-(k+1),t,&a[lda*k+k+1],1,
-              &a[lda*j+k+1],1);
+          //daxpy(n-(k+1),t,&a[lda*k+k+1],1, &a[lda*j+k+1],1);
+          ex_daxpy(n-(k+1),t,&a[lda*k+k+1],&a[lda*j+k+1]);
         } 
+        */
       }
       else { 
         *info = k;
@@ -666,7 +692,8 @@ void dgesl(REAL a[],int lda,int n,int ipvt[],REAL b[],int job )
           b[l] = b[k];
           b[k] = t;
         }       
-        daxpy(n-(k+1),t,&a[lda*k+k+1],1,&b[k+1],1 );
+        // daxpy(n-(k+1),t,&a[lda*k+k+1],1,&b[k+1],1 );
+        ex_daxpy(n-(k+1),t,&a[lda*k+k+1],&b[k+1]);
       }
     } 
 
@@ -676,7 +703,8 @@ void dgesl(REAL a[],int lda,int n,int ipvt[],REAL b[],int job )
       k = n - (kb + 1);
       b[k] = b[k]/a[lda*k+k];
       t = -b[k];
-      daxpy(k,t,&a[lda*k+0],1,&b[0],1 );
+      // daxpy(k,t,&a[lda*k+0],1,&b[0],1 );
+      ex_daxpy(k,t,&a[lda*k+0],&b[0]);
     }
   }
   else { 
@@ -773,6 +801,12 @@ void daxpy(int n, REAL da, REAL dx[], int incx, REAL dy[], int incy)
 
 #endif
   return;
+}
+
+void ex_daxpy(int n, REAL da, REAL dx[], REAL dy[]) {
+  for (int i = 0;i < n; i++) {
+    dy[i] += da*dx[i];
+  }
 }
 
 /*----------------------*/ 
@@ -945,6 +979,18 @@ int idamax(int n, REAL dx[], int incx)
     }
   }
   return (itemp);
+}
+
+int ex_idamax(int n, REAL dx[]) {
+  int itemp = 0;
+  REAL dmax = fabs(dx[0]);
+  for (int i = 1; i < n; ++i) {
+    if (fabs(dx[i]) > dmax) {
+      itemp = i;
+      dmax = fabs(dx[i]);
+    }
+  }
+  return itemp;
 }
 
 /*----------------------*/ 

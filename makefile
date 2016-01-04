@@ -77,12 +77,14 @@ FLAGS+=-qopt-report=3
 
 ################################################################################
 
+FLAGS += -parallel
+
 SP_ROLL   = -DSP -DROLL
 SP_UNROLL = -DSP -DUNROLL
 DP_ROLL   = -DDP -DROLL
 DP_UNROLL = -DDP -DUNROLL
 
-TYPE = ${SP_UNROLL}
+TYPE = ${SP_ROLL}
 
 linpack: linpack.c makefile
 	${CC} $< -o sp_unroll ${FLAGS} ${TYPE}
@@ -90,6 +92,15 @@ linpack: linpack.c makefile
 	@ date >> Linpack.txt
 	@ echo 'TYPE: ' ${TYPE} >> Linpack.txt
 	@ echo 'FLAGS: icc ' ${FLAGS} >> Linpack.txt
+
+VTUNE = -O1 -fno-inline -fno-inline-functions
+
+vtune: linpack.c makefile
+	${CC} $< -o vtune ${VTUNE} ${TYPE}
+	@ echo '-----------------------------------------------------' >> Linpack.txt
+	@ date >> Linpack.txt
+	@ echo 'TYPE: ' ${TYPE} >> Linpack.txt
+	@ echo 'FLAGS: icc ' ${VTUNE} >> Linpack.txt
 
 .PHONY: clean
 clean:

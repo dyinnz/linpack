@@ -4,9 +4,9 @@
 
 (defn split-reports
   [filename]
-  (map str/trim 
-       (filter #(and (not (str/blank? %))
-                     (re-find #"Rolling" %))
+  (filter #(and (not (empty? %)) 
+                (re-find #"Rolling" %))
+          (map str/trim 
                (str/split (slurp filename) cut-off))))
 
 (def raw-reports (split-reports "Linpack.txt"))
@@ -20,9 +20,9 @@
 
 (def get-date 
   (getter-maker [:date]
-                [#(re-find #"2016.*\d+:\d+:\d+\s*CST" %)]))
+                [#(re-find #"^.*\d+:\d+:\d+\s*CST" %)]))
 
-(def get-flags
+(def get-flags 
   (getter-maker [:flags]
                 [#(second (re-find #"FLAGS: (.*)" %))]))
 
@@ -38,19 +38,13 @@
            :mflops201 (second (re-find matcher))
            :mflops200 (second (re-find matcher)))))
 
-(def re-find-all 
-  (fn [re s] 
-    (let [matcher (re-matcher re s)]
-      (loop [notes []
-             getted (re-find matcher)]
-        (if (nil? getted)
-          notes
-          (recur (conj notes getted)
-                 (re-find matcher)))))))
-
 (def get-notes 
   (getter-maker [:notes]
-                [#(map second (re-find-all #"NOTE:\s+(.*)" %))]))
+                [#(map second (re-seq #"NOTE:\s+(.*)" %))]))
+
+(def get-type
+  (getter-maker [:program-type]
+                [#(second (re-find #"TYPE:\s+(.*)" %))]))
 
 ;(defn generate-performance
 ;  [report]
@@ -63,13 +57,14 @@
 
 (defn generate-performance
   [report]
-  (reduce (fn [results f] (f report results))
-          {}
+  ;(reduce (fn [results f] (f report results))
+  (reduce #(%2 report %1) {}
           [get-date
            get-flags
            get-matgen-dgefa-time
            get-mflops
-           get-notes]))
+           get-notes
+           get-type]))
 
 (def take-report (first raw-reports))
 ; (println (get-date take-report {}))
@@ -82,16 +77,17 @@
 (def extracted-reports (map generate-performance raw-reports))
 
 (defn write-out
-  [performance-report]
-  (println "Date:              " (performance-report :date))
-  (println "Flags:             " (performance-report :flags))
-  (println "160k matgen:       " (performance-report :matgen))
-  (println "16k matgen-dgefa:  " (performance-report :matgen-dgefa))
-  (println "Mflops 201:        " (performance-report :mflops201))
-  (println "Mflops 200:        " (performance-report :mflops200))
+  [{:keys [date program-type flags matgen matgen-dgefa mflops201 mflops200 notes]}]
+  (println "Date:              " date)
+  (println "Program type:      " program-type)
+  (println "Flags:             " flags)
+  (println "160k matgen:       " matgen)
+  (println "16k matgen-dgefa:  " matgen-dgefa)
+  (println "Mflops 201:        " mflops201)
+  (println "Mflops 200:        " mflops200)
   (println "Notes:")
-  (doall (map #(println %) (performance-report :notes)))
-  (println ""))
+  (doall (map println notes))
+  (println))
 
 (doall (map write-out extracted-reports))
 
